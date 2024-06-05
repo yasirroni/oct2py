@@ -16,9 +16,10 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest, macos-latest]
         python-version: [3.8, 3.9, "3.10", "3.11", "3.12"]
       fail-fast: false
 
@@ -31,7 +32,11 @@ jobs:
           sudo apt-get install -qq octave octave-signal liboctave-dev
       - name: Generate coverage report
         run: |
-          pip install hatch; xvfb-run --auto-servernum hatch run cover:test
+          pip install hatch
+          if [[ $RUNNER_OS == 'Linux' ]]; then
+            xvfb-run --auto-servernum hatch run cover:test
+          else
+            hatch run cover:test
 
   check_release:
     runs-on: ubuntu-latest
